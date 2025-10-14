@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Report extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['station_id', 'user_id', 'start_at', 'end_at', 'file_route'];
 
     public function station()

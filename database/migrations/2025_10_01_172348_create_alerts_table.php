@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('message');
             $table->enum('level', ['red', 'orange', 'yellow', 'green']);
-            $table->timestamp('start_at');
-            $table->timestamp('end_at')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

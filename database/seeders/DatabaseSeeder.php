@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Alert;
 use App\Models\Observation;
+use App\Models\Report;
 use App\Models\Station;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -42,5 +44,11 @@ class DatabaseSeeder extends Seeder
 
         // 4. Create 500 random observations
         Observation::factory(500)->create();
+
+        // 5. Create 50 random alerts
+        Alert::factory(50)->create();
+
+        // 6. Create 100 random reports
+        Report::factory(100)->create();
     }
 }
