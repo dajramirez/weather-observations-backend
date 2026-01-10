@@ -43,28 +43,51 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
+    /**
+     * A user belongs to a role.
+     */
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * A user has many observations.
+     */
     public function observations()
     {
         return $this->hasMany(Observation::class);
     }
 
+    /**
+     * A user has many reports.
+     */
     public function reports()
     {
         return $this->hasMany(Report::class);
     }
 
-    public function hasRole($roleName)
+    /**
+     * A user manages many stations.
+     */
+    public function stations()
     {
-        return $this->role && $this->role->name === $roleName;
+        return $this->belongsToMany(Station::class, 'station_user');
+    }
+
+    // AUTHORIZATION METHODS
+
+    /**
+     * Check if the user has a specific role.
+     * @param string $roleName
+     * @return bool
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role?->name === $roleName;
     }
 }

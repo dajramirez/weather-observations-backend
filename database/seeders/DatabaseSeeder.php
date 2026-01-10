@@ -9,6 +9,8 @@ use App\Models\Station;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,35 +22,63 @@ class DatabaseSeeder extends Seeder
         // 1. Seed roles first
         $this->call(RoleSeeder::class);
 
-        // 2. Then, create users
-        User::factory()->create([
+        // Define roles for reference
+        $adminRole = Role::where('name', 'admin')->first();
+        $observerRole = Role::where('name', 'observer')->first();
+        $userRole = Role::where('name', 'user')->first();
+
+        // 2. Create predefined users
+        $admin = User::factory()->create([
             'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'role_id' => 1, // Assigning 'admin' role
+            'email' => 'admin@meteo.com',
+            'password' => Hash::make('password'),
+            'role_id' => $adminRole->id, // Assign the 'admin' id
         ]);
 
-        User::factory()->create([
+        $observer = User::factory()->create([
             'name' => 'Observer',
-            'email' => 'observer@example.com',
-            'role_id' => 2, // Assigning 'observer' role
+            'email' => 'observer@meteo.com',
+            'password' => Hash::make('password'),
+            'role_id' => $observerRole->id, // Assign the 'observer' id
         ]);
 
-        User::factory()->create([
+        $regularUser = User::factory()->create([
             'name' => 'User',
-            'email' => 'user@example.com',
-            'role_id' => 3, // Assigning 'user' role
+            'email' => 'user@meteo.com',
+            'password' => Hash::make('password'),
+            'role_id' => $userRole->id, // Assign the 'user' id
         ]);
 
-        // 3. Create 10 random stations
-        Station::factory(10)->create();
+        // 3. Create random users with random roles
+        User::factory(50)->create([
+            'password' => Hash::make('password'), // Ensure a known password for testing
+        ]);
 
-        // 4. Create 500 random observations
+        // 4. Create 10 random stations
+        $stations = Station::factory(10)->create();
+
+        // 5. Assign users (admins and observers) to stations.
+        // We'll make 3 predefined users and 20 random users potential admins/observers.
+        $potentialObservers = User::whereIn('role_id', [$adminRole->id, $observerRole->id])
+            ->orWhereIn('id', [$admin->id, $observer->id])
+            ->inRandomOrder()
+            ->limit(20)
+            ->get();
+
+        $stations->each(function (Station $station) use ($potentialObservers) {
+            // Assign between 1 and 5 observers/admins to each station
+            $station->users()->attach(
+                $potentialObservers->random(rand(1, min(5, $potentialObservers->count())))->pluck('id')->toArray()
+            );
+        });
+
+        // 6. Create 500 random observations
         Observation::factory(500)->create();
 
-        // 5. Create 50 random alerts
+        // 9. Create 50 random alerts
         Alert::factory(50)->create();
 
-        // 6. Create 100 random reports
+        // 10. Create 100 random reports
         Report::factory(100)->create();
     }
 }

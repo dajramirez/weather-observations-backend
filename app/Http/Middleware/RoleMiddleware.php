@@ -12,11 +12,12 @@ class RoleMiddleware
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  string  $role
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!$request->user() || !$request->user()->hasRole($role)) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json(['message' => 'Forbidden - Not enough permissions'], 403);
         }
 
         return $next($request);

@@ -10,17 +10,26 @@ use Illuminate\Http\Request;
 
 class PublicDataController extends Controller
 {
-    // Return last observations and active alerts
+    /**
+     * Return the 5 latest observations and active alerts.
+     * This is the public endpoint (home).
+     * 
+     * @return JsonResponse
+     */
+
     public function index(): JsonResponse
     {
+        // Get the 5 latest observations with station info
         $observations = Observation::with('station')
-            ->latest()
+            ->latest('observed_at')
             ->take(5)
             ->get();
 
+        // Get all active alerts, including its station info
         $alerts = Alert::where('is_active', true)
+            ->with('station')
             ->latest()
-            ->get(['id', 'title', 'message', 'level', 'created_at']);
+            ->get(['id', 'station_id', 'title', 'message', 'level', 'created_at']);
 
         return response()->json([
             'message' => 'Welcome to the Weather Observations API',
