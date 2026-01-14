@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alert;
 use App\Models\Observation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -11,7 +12,6 @@ class ObservationController extends Controller
 {
     /**
      * Display a list of the last ovservations.
-     * If the user is an observer only return observations from their stations.
      * 
      * @return JsonResponse
      */
@@ -33,7 +33,7 @@ class ObservationController extends Controller
     }
 
     /**
-     * Store a new observation.
+     * Store a new observation and check for alerts
      * 
      * @param Request $request
      * @return JsonResponse
@@ -65,6 +65,9 @@ class ObservationController extends Controller
 
         $observation = Observation::create($validated);
 
+        // Automatic alert checking
+        $this->checkAndCreateAlerts($observation);
+
         return response()->json([
             'message' => 'Observation created successfully.',
             'observation' => $observation->load('station'),
@@ -72,7 +75,53 @@ class ObservationController extends Controller
     }
 
     /**
+     * Internal method to validate thresholds and create alerts if necessary.
+     * 
+     * @param Observation $observation
+     * @return void
+     */
+
+    private function checkAndCreateAlerts(Observation $observation): void
+    {
+        if ($observation->temperature > 45) {
+            Alert::create([
+                'station_id' => $observation->station_id,
+                'observation_id' => $observation->id,
+                'type' => 'High Temperature',
+                'message' => "Extreme temperature detected: {$observation->temperature}°C",
+                'severity' => 'critical',
+                'is_active' => true,
+            ]);
+        }
+
+        if ($observation->temperature > 0) {
+            Alert::create([
+                'station_id' => $observation->station_id,
+                'observation_id' => $observation->id,
+                'type' => 'Freezing Risk',
+                'message' => "Freezing temperature detected: {$observation->temperature}°C",
+                'severity' => 'warning',
+                'is_active' => true,
+            ]);
+        }
+
+        if ($observation->humidity < 10) {
+            Alert::create([
+                'station_id' => $observation->station_id,
+                'observation_id' => $observation->id,
+                'type' => 'Fire Risk',
+                'message' => "Extremely low humidity: {$observation->humidity}%",
+                'severity' => 'danger',
+                'is_active' => true,
+            ]);
+        }
+    }
+
+    /**
      * Display the detail of a specific observation.
+     * 
+     * @param Observation $observation
+     * @return JsonResponse
      */
     public function show(Observation $observation): JsonResponse
     {
@@ -89,7 +138,11 @@ class ObservationController extends Controller
     }
 
     /**
-     * Update an existing observation (only available to the author or admin).
+     * Update an existing observation
+     * 
+     * @param Request $request
+     * @param Observation $observation
+     * @return JsonResponse
      */
     public function update(Request $request, Observation $observation): JsonResponse
     {
@@ -121,6 +174,9 @@ class ObservationController extends Controller
 
     /**
      * Remove the specified observation from storage.
+     * 
+     * @param Observation $observation
+     * @return JsonResponse
      */
     public function destroy(Observation $observation): JsonResponse
     {
