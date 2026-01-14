@@ -16,10 +16,12 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!$request->user() || !$request->user()->hasRole($role)) {
-            return response()->json(['message' => 'Forbidden - Not enough permissions'], 403);
+        if ($request->user() && ($request->user()->role_id === 1 || $request->user()->hasRole($role))) {
+            return $next($request);
         }
 
-        return $next($request);
+        return response()->json([
+            'message' => 'Forbidden. You do not have the required role to access this resource.',
+        ], 403);
     }
 }

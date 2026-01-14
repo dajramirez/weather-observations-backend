@@ -84,7 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [ObserverController::class, 'dashboard']);
 
         // Listing and form to create new observations
-        Route::apiResource('observations', ObservationController::class);
+        Route::apiResource('/observations', ObservationController::class);
 
         // Generation of observation reports
         Route::get('/reports', [ObserverController::class, 'generateReports']);
