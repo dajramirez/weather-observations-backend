@@ -87,20 +87,20 @@ class ObservationController extends Controller
             Alert::create([
                 'station_id' => $observation->station_id,
                 'observation_id' => $observation->id,
-                'type' => 'High Temperature',
+                'title' => 'Extreme Heat Risk',
                 'message' => "Extreme temperature detected: {$observation->temperature}°C",
-                'severity' => 'critical',
+                'level' => 'red',
                 'is_active' => true,
             ]);
         }
 
-        if ($observation->temperature > 0) {
+        if ($observation->temperature < 0) {
             Alert::create([
                 'station_id' => $observation->station_id,
                 'observation_id' => $observation->id,
-                'type' => 'Freezing Risk',
+                'title' => 'Freezing Warning',
                 'message' => "Freezing temperature detected: {$observation->temperature}°C",
-                'severity' => 'warning',
+                'level' => 'orange',
                 'is_active' => true,
             ]);
         }
@@ -109,9 +109,9 @@ class ObservationController extends Controller
             Alert::create([
                 'station_id' => $observation->station_id,
                 'observation_id' => $observation->id,
-                'type' => 'Fire Risk',
+                'title' => 'Fire Risk',
                 'message' => "Extremely low humidity: {$observation->humidity}%",
-                'severity' => 'danger',
+                'level' => 'red',
                 'is_active' => true,
             ]);
         }
