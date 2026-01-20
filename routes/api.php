@@ -69,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Generation of reports (PDF, CSV, etc.)
         Route::get('/reports', [AdminController::class, 'generateReports']);
+
+        // Enable or disable an alert
+        Route::patch('/alerts/{alert}/toggle-active', [AlertController::class, 'togleActive']);
     });
 
     /*
@@ -91,6 +94,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Visualization of active alerts (read-only)
         Route::get('/alerts', [AlertController::class, 'index']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin + Observer API Routes
+    |--------------------------------------------------------------------------
+    | All the routes inside this group require a valid Sanctum token and role admin or observer.
+    */
+
+    Route::middleware('role:admin,observer')->group(function () {
+
+        // Listing of alerts
+        Route::get('alerts', [AlertController::class, 'index']);
+
+        // Alert details
+        Route::get('alerts/{alert}', [AlertController::class, 'show']);
     });
 
     /*
