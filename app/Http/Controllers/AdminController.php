@@ -26,33 +26,21 @@ class AdminController extends Controller
 
     public function dashboard(): JsonResponse
     {
-        // Total counts for key entities
-        $totalUsers = User::count();
-        $totalStations = Station::count();
-        $totalObservations = Observation::count();
-        $activeAlerts = Alert::where('is_active', true)->count();
-
-        // Get the last 5 users registered
-        $latestUsers = User::with('role')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get(['id', 'name', 'email', 'role_id', 'created_at']);
-
-        // Get the top 5 stations by number of observations
-        $topStations = Station::withCount('observations')
-            ->orderBy('observations_count', 'desc')
-            ->take(5)
-            ->get(['id', 'name', 'location', 'observations_count']);
+        $stats = [
+            'total_users' => User::count(),
+            'total_stations' => Station::count(),
+            'total_observations' => Observation::count(),
+            'active_alerts' => Alert::where('is_active', true)->count(),
+            'observatons_today' => Observation::whereDate('observed_at', today())->count(),
+        ];
 
         return response()->json([
-            'summary' => [
-                'total_users' => $totalUsers,
-                'total_stations' => $totalStations,
-                'total_observations' => $totalObservations,
-                'active_alerts' => $activeAlerts,
-            ],
-            'latest_users' => $latestUsers,
-            'top_stations' => $topStations,
+            'summary' => $stats,
+            'recent_users' => User::with('role:id,name')->latest()->take(5)->get(),
+            'top_stations' => Station::withCount('observations')
+                ->orderBy('observations_count', 'desc')
+                ->take(5)
+                ->get(),
         ]);
     }
 
@@ -65,18 +53,9 @@ class AdminController extends Controller
      * 
      * @return JsonResponse
      */
-    public function listUsers(): JsonResponse
+    public function index(): JsonResponse
     {
-        $users = User::with('role:id,name')
-            ->orderBy('name')
-            ->get(['id', 'name', 'email', 'role_id', 'created_at']);
-
-        $roles = Role::all(['id', 'name']);
-
-        return response()->json([
-            'users' => $users,
-            'available_roles' => $roles,
-        ]);
+        return response()->json(User::with(['role', 'stations'])->get());
     }
 
     /**
@@ -98,8 +77,25 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'User role updated successfully.',
-            'user' => $user->load('role:id,name'),
+            'user' => $user->load('role'),
         ]);
+    }
+
+    /**
+     * Delete a user.
+     * 
+     * @param User $user
+     * @return JsonResponse
+     */
+
+    public function deleteUser(User $user): JsonResponse
+    {
+        $userName = $user->name;
+        $user->delete();
+
+        return response()->json([
+            'message' => "User '$userName' deleted successfully.",
+        ], 200);
     }
 
     // =========================================================================
@@ -205,49 +201,57 @@ class AdminController extends Controller
     // =========================================================================
 
     /**
-     * Assign or unassign an observer to/from a station.
-     * 
-     * @param Request $request
-     * @param Station $station
-     * @return JsonResponse
+     * Assign an observer to a station.
      */
-
-    public function assignObserver(Request $request, Station $station): JsonResponse
+    public function assignStation(Request $request, Station $station): JsonResponse
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            // 'action' must be either 'assign' or 'unassign'
-            'action' => ['required', 'string', Rule::in(['assign', 'unassign'])],
+            'user_id' => [
+                'required',
+                'exists:users,id',
+                // Ensure the user is an observer
+                function ($attribute, $value, $fail) {
+                    $user = User::find($value);
+                    if ($user && !$user->hasRole('observer')) {
+                        $fail('The selected user must be an observer.');
+                    }
+                },
+            ]
         ]);
 
-        $userId = $validated['user_id'];
-        $user = User::findOrFail($userId);
-
-        // Check if the user is an observer
-        if (!$user->hasRole('observer') && !$user->hasRole('admin')) {
+        // Avoid duplicate assignment
+        if ($station->users()->where('user_id', $validated['user_id'])->exists()) {
             return response()->json([
-                'message' => 'User must be an observer or admin to be assigned to a station.',
+                'message' => 'This observer is already assigned to the station.',
             ], 422);
         }
 
-        if ($validated['action'] === 'assign') {
-            // Attach the user to the station (if not already attached)
-            $station->user()->syncWithoutDetaching([$userId]);
-            $message = "User '{$user->name}' successfully assigned to station '{$station->name}'.";
-        } else {
-            // Detach the user from the station
-            $station->user()->detach($userId);
-            $message = "User '{$user->name}' successfully unassigned from station '{$station->name}'.";
-        }
-
-        // Reload the station with users to return the updated list.
-        $station->load('users:id,name,email');
+        $station->users()->attach($validated['user_id']);
 
         return response()->json([
-            'message' => $message,
-            'station' => $station,
+            'message' => "Observer assigned to station successfully.",
+            'station' => $station->load('users'),
         ]);
     }
+
+    /**
+     * Unassign an observer from a station.
+     */
+    public function unassignStation(Request $request, Station $station): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $station->users()->detach($validated['user_id']);
+
+        return response()->json([
+            'message' => "Observer unassigned from station successfully.",
+            'station' => $station->load('users'),
+        ]);
+    }
+
+    //POR AQUÍ NOS HEMOS QUEDADO!!!!!! MAÑANA MÁS
 
     // =========================================================================
     //                          ALERT MANAGEMENT (CRUD)

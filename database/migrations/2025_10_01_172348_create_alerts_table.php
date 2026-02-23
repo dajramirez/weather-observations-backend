@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('alerts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('station_id')->constrained('stations')->onDelete('cascade');
+            $table->foreignId('observation_id')->constrained('observations')->onDelete('cascade');
             $table->string('title');
             $table->text('message');
             $table->enum('level', ['red', 'orange', 'yellow', 'green']);

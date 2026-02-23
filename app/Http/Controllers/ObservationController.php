@@ -22,14 +22,12 @@ class ObservationController extends Controller
         $query = Observation::with(['station', 'user:id,name']);
 
         // If the user is not an admin, filter observations by user's stations
-        if ($user->role->name !== 'admin') {
+        if (!$user->hasRole('admin')) {
             $stationsIds = $user->stations->pluck('id');
             $query->whereIn('station_id', $stationsIds);
         }
 
-        $observations = $query->latest('observed_at')->paginate(15);
-
-        return response()->json($observations);
+        return response()->json($query->latest('observed_at')->paginate(15));
     }
 
     /**
@@ -53,17 +51,17 @@ class ObservationController extends Controller
             'precipitation' => 'nullable|numeric|min:0',
         ]);
 
-        // Ensure the user has access to the station
-        if ($user->role->name !== 'admin' && !$user->stations->contains($validated['station_id'])) {
-            return response()->json([
-                'message' => 'You do not have permission to add observations for this station.',
-            ], 403);
+        // Check if the observer has assigned this station
+        if (!$user->hasRole('admin')) {
+            $isAssigned = $user->stations()->where('stations.id', $validated['station_id'])->exists();
+            if (!$isAssigned) {
+                return response()->json([
+                    'message' => 'You do not have permission to add observations for this station.',
+                ], 403);
+            }
         }
 
-        // Add the user_id to the validated data
-        $validated['user_id'] = $user->id;
-
-        $observation = Observation::create($validated);
+        $observation = Observation::create(array_merge($validated, ['user_id' => $user->id,]));
 
         // Automatic alert checking
         $this->checkAndCreateAlerts($observation);
@@ -83,37 +81,28 @@ class ObservationController extends Controller
 
     private function checkAndCreateAlerts(Observation $observation): void
     {
-        if ($observation->temperature > 45) {
-            Alert::create([
-                'station_id' => $observation->station_id,
-                'observation_id' => $observation->id,
+        $alertData = null;
+
+        if ($observation->temperature > 42) {
+            $alertData = [
                 'title' => 'Extreme Heat Risk',
-                'message' => "Extreme temperature detected: {$observation->temperature}°C",
+                'message' => "Extreme temperature recorded: {$observation->temperature}°C",
                 'level' => 'red',
-                'is_active' => true,
-            ]);
-        }
-
-        if ($observation->temperature < 0) {
-            Alert::create([
-                'station_id' => $observation->station_id,
-                'observation_id' => $observation->id,
+            ];
+        } else if ($observation->temperature < 0) {
+            $alertData = [
                 'title' => 'Freezing Warning',
-                'message' => "Freezing temperature detected: {$observation->temperature}°C",
+                'message' => "Freezing temperature recorded: {$observation->temperature}°C",
                 'level' => 'orange',
-                'is_active' => true,
-            ]);
+            ];
         }
 
-        if ($observation->humidity < 10) {
-            Alert::create([
+        if ($alertData) {
+            Alert::create(array_merge($alertData, [
                 'station_id' => $observation->station_id,
                 'observation_id' => $observation->id,
-                'title' => 'Fire Risk',
-                'message' => "Extremely low humidity: {$observation->humidity}%",
-                'level' => 'red',
                 'is_active' => true,
-            ]);
+            ]));
         }
     }
 
@@ -184,7 +173,7 @@ class ObservationController extends Controller
 
         if ($user->role->name !== 'admin' && $user->id !== $observation->user_id) {
             return response()->json([
-                'message' => 'You do not have permission to delete observations created by other users.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 

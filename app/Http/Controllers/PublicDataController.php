@@ -12,6 +12,22 @@ use Illuminate\Http\Request;
 class PublicDataController extends Controller
 {
     /**
+     * Display a list of the last observations and active alerts for the homepage.
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
+    {
+        return response()->json([
+            'stations' => Station::select('id', 'name', 'location', 'altitude')->get(),
+            'active_alerts' => Alert::with('station:id,name')
+                ->where('is_active', true)
+                ->latest()
+                ->take(10)
+                ->get(),
+        ]);
+    }
+
+    /**
      * Retrieve a list of all weather stations with their basic info.
      * 
      * @return JsonResponse

@@ -24,10 +24,6 @@ Route::post('/login', [AuthController::class, 'login']);
 // Register a new user (currently optional)
 Route::post('/register', [AuthController::class, 'register']);
 
-// Public route with the last observations and alerts
-// NOTE: It will require a real PublicDataController for DB data
-Route::get('/home', [PublicDataController::class, 'index']);
-
 /*
 |--------------------------------------------------------------------------
 | Protected API Routes
@@ -45,6 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user()->load('role');
     });
 
+    // Routes for stations (StationController will handle role-based access)
+    Route::get('/stations', [StationController::class, 'index']);
+    Route::get('/stations/{station}', [StationController::class, 'show']);
+
     /*
     |--------------------------------------------------------------------------
     | Admin API Routes
@@ -53,25 +53,22 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
-
-        // Stations, observations and alerts general summary
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
-
-        // Meteorological stations CRUD (Using StationController)
-        Route::apiResource('stations', StationController::class);
-
-        // Assignation of stations to observers
-        // NOTE: This could be a method inside AdminController or UserController
-        Route::post('/stations/{station}/assign-observer', [AdminController::class, 'assignObserverToStation']);
-
-        // Complete alerts management
-        Route::apiResource('alerts', AlertController::class);
 
         // Generation of reports (PDF, CSV, etc.)
         Route::get('/reports', [AdminController::class, 'generateReports']);
 
+        // Assignation of stations to observers
+        Route::post('/stations/{station}/assign', [AdminController::class, 'assignStation']);
+        Route::delete('/stations/{station}/unassign', [AdminController::class, 'unassignStation']);
+
         // Enable or disable an alert
         Route::patch('/alerts/{alert}/toggle-active', [AlertController::class, 'togleActive']);
+
+        //
+        Route::get('/users', [AdminController::class, 'index']);
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole']);
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser']);
     });
 
     /*
@@ -82,18 +79,17 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('role:observer')->prefix('observer')->group(function () {
-
-        // Summary of assigned stations and recent observations
         Route::get('/dashboard', [ObserverController::class, 'dashboard']);
 
-        // Listing and form to create new observations
-        Route::apiResource('/observations', ObservationController::class);
+        // CRUD for observations (ObservationController will handle role-based access)
+        Route::get('/observations', [ObservationController::class, 'index']);
+        Route::post('/observations', [ObservationController::class, 'store']);
+        Route::get('/observations/{observation}', [ObservationController::class, 'show']);
+        Route::patch('/observations/{observation}', [ObservationController::class, 'update']);
+        Route::delete('/observations/{observation}', [ObservationController::class, 'destroy']);
 
-        // Generation of observation reports
+        // Generation of reports (PDF, CSV, etc.)
         Route::get('/reports', [ObserverController::class, 'generateReports']);
-
-        // Visualization of active alerts (read-only)
-        Route::get('/alerts', [AlertController::class, 'index']);
     });
 
     /*
@@ -104,11 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('role:admin,observer')->group(function () {
-
-        // Listing of alerts
         Route::get('alerts', [AlertController::class, 'index']);
-
-        // Alert details
         Route::get('alerts/{alert}', [AlertController::class, 'show']);
     });
 
@@ -120,14 +112,8 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('role:user')->prefix('user')->group(function () {
-
-        // Last available observations
         Route::get('/dashboard', [AppUserController::class, 'dashboard']);
-
-        // Open reports (read-only)
         Route::get('/reports', [AppUserController::class, 'listReports']);
-
-        // Active alerts (read-only)
         Route::get('/alerts', [AlertController::class, 'index']);
     });
 });

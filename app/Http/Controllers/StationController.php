@@ -2,47 +2,45 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Station;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List stations based on user role.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
+            $stations = Station::all();
+        } else {
+            $stations = $user->stations;
+        }
+
+        return response()->json($stations);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Display the details of a specific station.
      */
-    public function store(Request $request)
+    public function show(Station $station): JsonResponse
     {
-        //
-    }
+        $user = Auth::user();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if (!$user->hasRole('admin')) {
+            $isAssigned = $user->stations()->where('stations.id', $station->id)->exists();
+            if (!$isAssigned) {
+                return response()->json([
+                    'message' => 'You do not have permission to view this station.',
+                ], 403);
+            }
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json($station);
     }
 }

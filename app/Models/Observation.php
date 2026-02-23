@@ -42,7 +42,7 @@ class Observation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['station_id', 'user_id', 'temperature', 'humidity', 'pressure', 'wind_speed', 'wind_direction', 'observed_at'];
+    protected $fillable = ['station_id', 'user_id', 'temperature', 'precipitation', 'humidity', 'pressure', 'wind_speed', 'wind_direction', 'observed_at'];
 
     public function station()
     {
