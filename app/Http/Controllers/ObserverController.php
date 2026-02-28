@@ -32,8 +32,8 @@ class ObserverController extends Controller
             ->get();
 
         // Calculate some simple statistics (e.g., today average temperature)
-        $todayAvgTemp = $user->observations()
-            ->whereDate('observed_at', today())
+        $yearAverageTemperature = $user->observations()
+            ->where('observed_at', '>=', now()->subDays(365))
             ->avg('temperature');
 
         return response()->json([
@@ -41,7 +41,7 @@ class ObserverController extends Controller
             'recent_observations' => $recentObservations,
             'stats' => [
                 'total_assigned' => $stations->count(),
-                'average_temperature_today' => round($todayAvgTemp ?? 0, 2),
+                'year_average_temperature' => round(floatval($yearAverageTemperature), 2),
             ]
         ]);
     }
