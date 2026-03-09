@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class AlertController extends Controller
 {
@@ -16,12 +17,15 @@ class AlertController extends Controller
      * 
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
+        $perPage = $request->integer('per_page', 15);
 
         if ($user->hasRole('admin')) {
-            $alerts = Alert::with(['station', 'observation'])->latest()->get();
+            $alerts = Alert::with(['station', 'observation'])
+                ->latest()
+                ->paginate($perPage);
         } else {
             // Get IDs of stations assigned to the observer
             $stationIds = $user->stations()->pluck('stations.id');
@@ -29,7 +33,7 @@ class AlertController extends Controller
             $alerts = Alert::whereIn('station_id', $stationIds)
                 ->with(['station', 'observation'])
                 ->latest()
-                ->get();
+                ->paginate($perPage);
         }
 
         return response()->json($alerts);

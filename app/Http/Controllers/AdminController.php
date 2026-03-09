@@ -45,6 +45,37 @@ class AdminController extends Controller
     }
 
     // =========================================================================
+    //                          REPORT MANAGEMENT
+    // =========================================================================
+
+    public function generateReport(Request $request): JsonResponse
+    {
+        $request->validate([
+            'station_id' => 'required|exists:stations,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $observations = Observation::with('user:id,name')
+            ->where('station_id', $request->station_id)
+            ->whereBetween('observed_at', [$request->start_date, $request->end_date . ' 23:59:59'])
+            ->orderBy('observed_at')
+            ->get();
+
+        if ($observations->isEmpty()) {
+            return response()->json([
+                'message' => 'No observations found for the specified criteria.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Report generated successfully.',
+            'filename' => 'reporte_admin_' . $request->station_id . '.csv',
+            'data' => $observations,
+        ]);
+    }
+
+    // =========================================================================
     //                          USER MANAGEMENT
     // =========================================================================
 
@@ -250,8 +281,6 @@ class AdminController extends Controller
             'station' => $station->load('users'),
         ]);
     }
-
-    //POR AQUÍ NOS HEMOS QUEDADO!!!!!! MAÑANA MÁS
 
     // =========================================================================
     //                          ALERT MANAGEMENT (CRUD)

@@ -58,8 +58,12 @@ class ObserverController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
+        $user = Auth::user();
+
         $observations = Observation::where('station_id', $request->station_id)
-            ->whereBetween('observed_at', [$request->start_date, $request->end_date])
+            ->where('user_id', $user->id)
+            ->whereBetween('observed_at', [$request->start_date, $request->end_date . ' 23:59:59'])
+            ->orderBy('observed_at')
             ->get();
 
         if ($observations->isEmpty()) {
@@ -70,6 +74,7 @@ class ObserverController extends Controller
 
         return response()->json([
             'message' => 'Report generated successfully.',
+            'observer' => ['id' => $user->id, 'name' => $user->name],
             'filename' => 'reporte_' . $request->station_id . '.csv',
             'data' => $observations,
         ]);

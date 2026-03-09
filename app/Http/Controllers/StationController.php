@@ -19,7 +19,7 @@ class StationController extends Controller
         if ($user->hasRole('admin')) {
             $stations = Station::all();
         } else {
-            $stations = $user->stations;
+            $stations = $user->stations()->get();
         }
 
         return response()->json($stations);
