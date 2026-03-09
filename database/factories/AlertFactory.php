@@ -47,8 +47,8 @@ class AlertFactory extends Factory
             'message' => $this->faker->sentence(15),
             'level' => $level,
             'is_active' => $isActive,
-            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => $this->faker->optional()->dateTimeBetween('-6 months', 'now'),
+            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now, UTC'),
+            'updated_at' => $this->faker->optional()->dateTimeBetween('-6 months', 'now', 'UTC'),
         ];
     }
 }

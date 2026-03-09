@@ -28,7 +28,7 @@ class ObservationFactory extends Factory
         $userId = User::inRandomOrder()->first() ?? User::factory();
 
         // Generate an observation date within the last year
-        $observedDate = $this->faker->dateTimeBetween('-1 year', 'now');
+        $observedDate = $this->faker->dateTimeBetween('-1 year', 'now', 'UTC');
 
         return [
             // Foreign keys

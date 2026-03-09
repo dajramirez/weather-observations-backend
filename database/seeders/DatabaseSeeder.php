@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
 
         // 4. Create 10 random stations
         $stations = Station::factory(10)->create();
+        $stationsIds = $stations->pluck('id');
 
         // 5. Assign users (admins and observers) to stations.
         // We'll make 3 predefined users and 20 random users potential admins/observers.
@@ -73,12 +74,19 @@ class DatabaseSeeder extends Seeder
         });
 
         // 6. Create 500 random observations
-        Observation::factory(500)->create();
+        $observations = Observation::factory(500)->create();
+        $observationsIds = $observations->pluck('id');
 
         // 9. Create 50 random alerts
-        Alert::factory(50)->create();
+        Alert::factory(50)->create([
+            'observation_id' => fn() => $observationsIds->random(),
+            'station_id' => fn() => $stationsIds->random(),
+        ]);
 
         // 10. Create 100 random reports
-        Report::factory(100)->create();
+        Report::factory(100)->create([
+            'station_id' => fn() => $stationsIds->random(),
+            'user_id' => fn() => User::WhereIn('role_id', [$adminRole->id, $observerRole->id])->inRandomOrder()->value('id'),
+        ]);
     }
 }

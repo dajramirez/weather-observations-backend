@@ -27,7 +27,7 @@ class ReportFactory extends Factory
     public function definition(): array
     {
         // Generate a start date within the last year
-        $startDate = $this->faker->dateTimeBetween('-1 year', 'now');
+        $startDate = $this->faker->dateTimeBetween('-1 year', 'now', 'UTC');
 
         // Generate an end date that is after the start date (by 1 and 3 months)
         $endDate = $this->faker->dateTimeBetween($startDate, (clone $startDate)->modify('+3 months'));
@@ -45,8 +45,8 @@ class ReportFactory extends Factory
 
             'file_route' => "reports/report_{$reportId}." . $fileType,
 
-            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => $this->faker->optional()->dateTimeBetween($startDate, 'now'),
+            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now', 'UTC'),
+            'updated_at' => $this->faker->optional()->dateTimeBetween($startDate, 'now', 'UTC'),
         ];
     }
 }
