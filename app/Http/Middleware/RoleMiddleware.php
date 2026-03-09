@@ -14,10 +14,19 @@ class RoleMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string  $role
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if ($request->user() && ($request->user()->role_id === 1 || $request->user()->hasRole($role))) {
-            return $next($request);
+        if ($request->user()) {
+            // Admins always have access
+            if ($request->user()->role_id === 1) {
+                return $next($request);
+            }
+            // Check if the user has the required role
+            foreach ($roles as $role) {
+                if ($request->user()->hasRole($role)) {
+                    return $next($request);
+                }
+            }
         }
 
         return response()->json([

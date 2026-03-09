@@ -9,7 +9,6 @@ use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\ObserverController;
-use App\Http\Controllers\PublicDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,9 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
 
-        // Generation of reports (PDF, CSV, etc.)
-        Route::get('/reports', [AdminController::class, 'generateReports']);
-
         // Assignation of stations to observers
         Route::post('/stations/{station}/assign', [AdminController::class, 'assignStation']);
         Route::delete('/stations/{station}/unassign', [AdminController::class, 'unassignStation']);
@@ -89,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/observations/{observation}', [ObservationController::class, 'destroy']);
 
         // Generation of reports (PDF, CSV, etc.)
-        Route::get('/reports', [ObserverController::class, 'generateReports']);
+        Route::get('/reports', [ObserverController::class, 'generateReport']);
     });
 
     /*
