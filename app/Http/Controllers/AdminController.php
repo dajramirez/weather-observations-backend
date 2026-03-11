@@ -141,7 +141,7 @@ class AdminController extends Controller
 
     public function listStations(): JsonResponse
     {
-        $stations = Station::with('user:id,name,email')
+        $stations = Station::with('users:id,name,email')
             ->orderBy('name')
             ->get();
 

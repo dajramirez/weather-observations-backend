@@ -53,18 +53,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/reports', [AdminController::class, 'generateReport']);
 
-        // Assignation of stations to observers
+        // Users
+        Route::get('/users', [AdminController::class, 'index']);
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole']);
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
+
+        // Stations
+        Route::get('/stations', [AdminController::class, 'listStations']);
+        Route::post('/stations', [AdminController::class, 'createStation']);
+        Route::patch('/stations/{station}', [AdminController::class, 'updateStation']);
+        Route::delete('/stations/{station}', [AdminController::class, 'deleteStation']);
         Route::post('/stations/{station}/assign', [AdminController::class, 'assignStation']);
         Route::delete('/stations/{station}/unassign', [AdminController::class, 'unassignStation']);
 
-        // Enable or disable an alert
+        // Alerts
+        Route::get('/alerts', [AdminController::class, 'listAlerts']);
+        Route::post('/alerts', [AdminController::class, 'createAlert']);
+        Route::patch('/alerts/{alert}', [AdminController::class, 'updateAlert']);
+        Route::delete('/alerts/{alert}', [AdminController::class, 'deleteAlert']);
         Route::patch('/alerts/{alert}/toggle-active', [AlertController::class, 'togleActive']);
-
-        //
-        Route::get('/users', [AdminController::class, 'index']);
-        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole']);
-        Route::delete('/users/{user}', [AdminController::class, 'destroyUser']);
     });
 
     /*
