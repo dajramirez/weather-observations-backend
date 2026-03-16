@@ -68,6 +68,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/stations/{station}/assign', [AdminController::class, 'assignStation']);
         Route::delete('/stations/{station}/unassign', [AdminController::class, 'unassignStation']);
 
+        // Observations
+        Route::get('/observations', [ObservationController::class, 'index']);
+        Route::post('/observations', [ObservationController::class, 'store']);
+        Route::get('/observations/{observation}', [ObservationController::class, 'show']);
+        Route::patch('/observations/{observation}', [ObservationController::class, 'update']);
+        Route::delete('/observations/{observation}', [ObservationController::class, 'destroy']);
+
         // Alerts
         Route::get('/alerts', [AdminController::class, 'listAlerts']);
         Route::post('/alerts', [AdminController::class, 'createAlert']);
