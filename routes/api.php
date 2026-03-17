@@ -9,6 +9,7 @@ use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\ObserverController;
+use App\Http\Controllers\PublicDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,11 @@ use App\Http\Controllers\ObserverController;
 |--------------------------------------------------------------------------
 | This routes don't require a valid Sanctum token.
 */
+
+Route::get('/public', [PublicDataController::class, 'index']);
+Route::get('/public/stations', [PublicDataController::class, 'stations']);
+Route::get('/public/stations/{stationId}/observations', [PublicDataController::class, 'latestObservations']);
+Route::get('/public/search', [PublicDataController::class, 'search']);
 
 // Admin, observer or user access
 Route::post('/login', [AuthController::class, 'login']);
