@@ -1,14 +1,15 @@
 #!/bin/bash
 set -e
 
-# Generar APP_KEY si no existe
 if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
-# Limpiar y cachear configuración
+php artisan config:clear
 php artisan config:cache
 php artisan route:cache
 
-# Iniciar Apache
+# Mostrar el error de Laravel en los logs
+php artisan tinker --execute="DB::connection()->getPdo();" 2>&1 || echo "DB CONNECTION FAILED"
+
 apache2-foreground
