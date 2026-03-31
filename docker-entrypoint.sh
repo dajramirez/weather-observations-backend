@@ -15,6 +15,10 @@ php artisan config:clear
 php artisan config:cache
 php artisan route:cache
 
+# Corregir conflicto de MPM
+a2dismod mpm_event mpm_worker 2>/dev/null || true
+a2enmod mpm_prefork 2>/dev/null || true
+
 # Configurar Apache con el puerto que asigna Railway
 RENDER_PORT=${PORT:-80}
 echo "Listen ${RENDER_PORT}" > /etc/apache2/ports.conf
