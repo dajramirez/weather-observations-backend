@@ -10,6 +10,8 @@ use App\Models\Station;
 use App\Models\Observation;
 use App\Models\Role;
 use Illuminate\Validation\Rule;
+use App\Models\Report;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -68,11 +70,37 @@ class AdminController extends Controller
             ], 404);
         }
 
+        Report::create([
+            'station_id' => $request->station_id,
+            'user_id' => Auth::id(),
+            'start_at' => $request->start_date,
+            'end_at' => $request->end_date,
+            'is_public' => false,
+            'file_route' => null,
+        ]);
+
         return response()->json([
             'message' => 'Report generated successfully.',
             'filename' => 'reporte_admin_' . $request->station_id . '.csv',
             'data' => $observations,
         ]);
+    }
+
+    public function listReports(): JsonResponse
+    {
+        $reports = Report::with('station:id,name', 'user:id,name')
+            ->latest()
+            ->get();
+
+        return response()->json($reports);
+    }
+
+    public function togglePublic(Report $report): JsonResponse
+    {
+        $report->is_public = !$report->is_public;
+        $report->save();
+
+        return response()->json(['message' => 'Report visibility updated.', 'report' => $report]);
     }
 
     // =========================================================================

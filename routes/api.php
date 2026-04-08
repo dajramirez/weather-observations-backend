@@ -60,6 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/reports', [AdminController::class, 'generateReport']);
+        Route::get('/reports/history', [AdminController::class, 'listReports']);
+        Route::patch('/reports/{report}/toggle-public', [AdminController::class, 'togglePublic']);
 
         // Users
         Route::get('/users', [AdminController::class, 'index']);
@@ -108,6 +110,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Generation of reports (PDF, CSV, etc.)
         Route::get('/reports', [ObserverController::class, 'generateReport']);
+        Route::get('/reports/history', [ObserverController::class, 'listReports']);
+        Route::patch('/reports/{report}/toggle-public', [ObserverController::class, 'togglePublic']);
     });
 
     /*

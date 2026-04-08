@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Observation;
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,11 +73,50 @@ class ObserverController extends Controller
             ], 404);
         }
 
+        $report = Report::create([
+            'station_id' => $request->station_id,
+            'user_id' => $user->id,
+            'start_at' => $request->start_date,
+            'end_at' => $request->end_date,
+            'is_public' => false,
+            'file_route' => null,
+        ]);
+
         return response()->json([
             'message' => 'Report generated successfully.',
             'observer' => ['id' => $user->id, 'name' => $user->name],
             'filename' => 'reporte_' . $request->station_id . '.csv',
             'data' => $observations,
         ]);
+    }
+
+    public function listReports(): JsonResponse
+    {
+        $user = Auth::user();
+
+        $reports = Report::with('station:id,name')
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhere('is_public', true);
+            })
+            ->latest()
+            ->get();
+
+        return response()->json($reports);
+    }
+
+    public function togglePublic(Report $report): JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($report->user_id !== $user->id) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $report->is_public = !$report->is_public;
+        $report->save();
+
+        return response()->json(['message' => 'Report visibility updated.', 'report' => $report]);
     }
 }

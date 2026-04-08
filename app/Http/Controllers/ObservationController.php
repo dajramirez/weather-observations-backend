@@ -81,23 +81,106 @@ class ObservationController extends Controller
 
     private function checkAndCreateAlerts(Observation $observation): void
     {
-        $alertData = null;
+        $alerts = [];
 
-        if ($observation->temperature > 42) {
-            $alertData = [
-                'title' => 'Extreme Heat Risk',
-                'message' => "Extreme temperature recorded: {$observation->temperature}°C",
-                'level' => 'red',
-            ];
-        } else if ($observation->temperature < 0) {
-            $alertData = [
-                'title' => 'Freezing Warning',
-                'message' => "Freezing temperature recorded: {$observation->temperature}°C",
-                'level' => 'orange',
-            ];
+        // Temperatura extrema
+        if ($observation->temperature !== null) {
+            if ($observation->temperature >= 42) {
+                $alerts[] = [
+                    'title' => 'Calor extremo',
+                    'message' => "Temperatura extremadamente alta registrada: {$observation->temperature}°C. Riesgo severo para la salud.",
+                    'level' => 'red',
+                ];
+            } elseif ($observation->temperature >= 35) {
+                $alerts[] = [
+                    'title' => 'Ola de calor',
+                    'message' => "Temperatura muy alta registrada: {$observation->temperature}°C. Precaución.",
+                    'level' => 'orange',
+                ];
+            } elseif ($observation->temperature <= -10) {
+                $alerts[] = [
+                    'title' => 'Frío extremo',
+                    'message' => "Temperatura extremadamente baja registrada: {$observation->temperature}°C. Riesgo de hipotermia.",
+                    'level' => 'red',
+                ];
+            } elseif ($observation->temperature <= 0) {
+                $alerts[] = [
+                    'title' => 'Helada',
+                    'message' => "Temperatura bajo cero registrada: {$observation->temperature}°C. Posible formación de hielo.",
+                    'level' => 'orange',
+                ];
+            }
         }
 
-        if ($alertData) {
+        // Viento fuerte
+        if ($observation->wind_speed !== null) {
+            if ($observation->wind_speed >= 90) {
+                $alerts[] = [
+                    'title' => 'Viento huracanado',
+                    'message' => "Velocidad del viento extrema: {$observation->wind_speed} km/h. Peligro muy alto.",
+                    'level' => 'red',
+                ];
+            } elseif ($observation->wind_speed >= 60) {
+                $alerts[] = [
+                    'title' => 'Viento fuerte',
+                    'message' => "Viento fuerte registrado: {$observation->wind_speed} km/h. Precaución.",
+                    'level' => 'orange',
+                ];
+            } elseif ($observation->wind_speed >= 40) {
+                $alerts[] = [
+                    'title' => 'Viento moderado',
+                    'message' => "Viento moderado registrado: {$observation->wind_speed} km/h.",
+                    'level' => 'yellow',
+                ];
+            }
+        }
+
+        // Precipitación intensa
+        if ($observation->precipitation !== null) {
+            if ($observation->precipitation >= 50) {
+                $alerts[] = [
+                    'title' => 'Lluvia torrencial',
+                    'message' => "Precipitación muy intensa: {$observation->precipitation} mm. Riesgo de inundaciones.",
+                    'level' => 'red',
+                ];
+            } elseif ($observation->precipitation >= 20) {
+                $alerts[] = [
+                    'title' => 'Lluvia intensa',
+                    'message' => "Precipitación intensa registrada: {$observation->precipitation} mm.",
+                    'level' => 'orange',
+                ];
+            }
+        }
+
+        // Presión atmosférica anómala
+        if ($observation->pressure !== null) {
+            if ($observation->pressure <= 970) {
+                $alerts[] = [
+                    'title' => 'Presión muy baja',
+                    'message' => "Presión atmosférica muy baja: {$observation->pressure} hPa. Posible temporal.",
+                    'level' => 'orange',
+                ];
+            } elseif ($observation->pressure >= 1040) {
+                $alerts[] = [
+                    'title' => 'Presión muy alta',
+                    'message' => "Presión atmosférica muy alta: {$observation->pressure} hPa.",
+                    'level' => 'yellow',
+                ];
+            }
+        }
+
+        // Humedad extrema
+        if ($observation->humidity !== null) {
+            if ($observation->humidity >= 95) {
+                $alerts[] = [
+                    'title' => 'Humedad extrema',
+                    'message' => "Humedad muy alta registrada: {$observation->humidity}%. Riesgo de niebla densa.",
+                    'level' => 'yellow',
+                ];
+            }
+        }
+
+        foreach ($alerts as $alertData) {
             Alert::create(array_merge($alertData, [
                 'station_id' => $observation->station_id,
                 'observation_id' => $observation->id,

@@ -77,11 +77,53 @@ class DatabaseSeeder extends Seeder
         $observations = Observation::factory(50)->create();
         $observationsIds = $observations->pluck('id');
 
-        // 9. Create 50 random alerts
-        Alert::factory(10)->create([
-            'observation_id' => fn() => $observationsIds->random(),
-            'station_id' => fn() => $stationsIds->random(),
-        ]);
+        // 9. Generar alertas automáticamente a partir de las observaciones
+        foreach ($observations as $observation) {
+            $alerts = [];
+
+            if ($observation->temperature >= 42) {
+                $alerts[] = ['title' => 'Calor extremo', 'message' => "Temperatura extremadamente alta: {$observation->temperature}°C.", 'level' => 'red'];
+            } elseif ($observation->temperature >= 35) {
+                $alerts[] = ['title' => 'Ola de calor', 'message' => "Temperatura muy alta: {$observation->temperature}°C.", 'level' => 'orange'];
+            } elseif ($observation->temperature <= -10) {
+                $alerts[] = ['title' => 'Frío extremo', 'message' => "Temperatura extremadamente baja: {$observation->temperature}°C.", 'level' => 'red'];
+            } elseif ($observation->temperature <= 0) {
+                $alerts[] = ['title' => 'Helada', 'message' => "Temperatura bajo cero: {$observation->temperature}°C.", 'level' => 'orange'];
+            }
+
+            if ($observation->wind_speed >= 90) {
+                $alerts[] = ['title' => 'Viento huracanado', 'message' => "Viento extremo: {$observation->wind_speed} km/h.", 'level' => 'red'];
+            } elseif ($observation->wind_speed >= 60) {
+                $alerts[] = ['title' => 'Viento fuerte', 'message' => "Viento fuerte: {$observation->wind_speed} km/h.", 'level' => 'orange'];
+            } elseif ($observation->wind_speed >= 40) {
+                $alerts[] = ['title' => 'Viento moderado', 'message' => "Viento moderado: {$observation->wind_speed} km/h.", 'level' => 'yellow'];
+            }
+
+            if ($observation->precipitation >= 50) {
+                $alerts[] = ['title' => 'Lluvia torrencial', 'message' => "Precipitación muy intensa: {$observation->precipitation} mm.", 'level' => 'red'];
+            } elseif ($observation->precipitation >= 20) {
+                $alerts[] = ['title' => 'Lluvia intensa', 'message' => "Precipitación intensa: {$observation->precipitation} mm.", 'level' => 'orange'];
+            }
+
+            if ($observation->pressure <= 970) {
+                $alerts[] = ['title' => 'Presión muy baja', 'message' => "Presión atmosférica muy baja: {$observation->pressure} hPa.", 'level' => 'orange'];
+            } elseif ($observation->pressure >= 1040) {
+                $alerts[] = ['title' => 'Presión muy alta', 'message' => "Presión atmosférica muy alta: {$observation->pressure} hPa.", 'level' => 'yellow'];
+            }
+
+            if ($observation->humidity >= 95) {
+                $alerts[] = ['title' => 'Humedad extrema', 'message' => "Humedad muy alta: {$observation->humidity}%.", 'level' => 'yellow'];
+            }
+
+            foreach ($alerts as $alertData) {
+                Alert::create(array_merge($alertData, [
+                    'station_id' => $observation->station_id,
+                    'observation_id' => $observation->id,
+                    'is_active' => true,
+                    'created_at' => $observation->observed_at,
+                ]));
+            }
+        }
 
         // 10. Create 100 random reports
         Report::factory(10)->create([
