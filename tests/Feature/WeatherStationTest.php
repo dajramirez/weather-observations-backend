@@ -71,7 +71,7 @@ class WeatherStationTest extends TestCase
             ->postJson('/api/observer/observations', $payload);
 
         $this->assertDatabaseHas('alerts', [
-            'title' => 'Extreme Heat Risk',
+            'title' => 'Calor extremo',
             'level' => 'red',
             'station_id' => $this->station->id,
         ]);
@@ -97,7 +97,7 @@ class WeatherStationTest extends TestCase
             ->postJson('/api/observer/observations', $payload);
 
         $this->assertDatabaseHas('alerts', [
-            'title' => 'Freezing Warning',
+            'title' => 'Helada',
             'level' => 'orange',
         ]);
     }
@@ -274,7 +274,7 @@ class WeatherStationTest extends TestCase
         ]);
 
         // 2. Verify alert exists in system
-        $alert = Alert::where('title', 'Extreme Heat Risk')->first();
+        $alert = Alert::where('title', 'Calor extremo')->first();
         $this->assertNotNull($alert);
         $this->assertTrue($alert->is_active);
 
@@ -282,7 +282,7 @@ class WeatherStationTest extends TestCase
         $this->actingAs($this->admin);
 
         $listResponse = $this->getJson('/api/admin/alerts');
-        $listResponse->assertStatus(200)->assertJsonFragment(['title' => 'Extreme Heat Risk']);
+        $listResponse->assertStatus(200)->assertJsonFragment(['title' => 'Calor extremo']);
 
         $toggleResponse = $this->patchJson("/api/admin/alerts/{$alert->id}/toggle-active");
         $toggleResponse->assertStatus(200);

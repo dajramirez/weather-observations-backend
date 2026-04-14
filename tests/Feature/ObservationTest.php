@@ -94,7 +94,7 @@ class ObservationTest extends TestCase
 
         // Verify that an alert was created
         $this->assertDatabaseHas('alerts', [
-            'title' => 'Extreme Heat Risk',
+            'title' => 'Calor extremo',
             'level' => 'red',
             'station_id' => $this->station->id,
         ]);
