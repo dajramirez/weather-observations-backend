@@ -136,6 +136,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:user')->prefix('user')->group(function () {
         Route::get('/dashboard', [AppUserController::class, 'dashboard']);
         Route::get('/reports', [AppUserController::class, 'listReports']);
-        Route::get('/alerts', [AlertController::class, 'index']);
+        Route::get('/alerts', [AppUserController::class, 'listAlerts']);
     });
 });
