@@ -8,7 +8,6 @@ use App\Models\Role;
 use App\Models\Station;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class WeatherStationTest extends TestCase
@@ -219,7 +218,7 @@ class WeatherStationTest extends TestCase
     }
 
     /**
-     * Test 9: Observation model calculates humidity correctly (Business Logic check).
+     * Test 9: Observation store data correctly.
      */
     public function test_observation_stores_data_correctly(): void
     {
@@ -287,7 +286,6 @@ class WeatherStationTest extends TestCase
         $toggleResponse = $this->patchJson("/api/admin/alerts/{$alert->id}/toggle-active");
         $toggleResponse->assertStatus(200);
 
-        // Final verification
         $this->assertDatabaseHas('alerts', [
             'id' => $alert->id,
             'is_active' => false,

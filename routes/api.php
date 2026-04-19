@@ -23,10 +23,8 @@ Route::get('/public/stations', [PublicDataController::class, 'stations']);
 Route::get('/public/stations/{stationId}/observations', [PublicDataController::class, 'latestObservations']);
 Route::get('/public/search', [PublicDataController::class, 'search']);
 
-// Admin, observer or user access
 Route::post('/login', [AuthController::class, 'login']);
 
-// Register a new user (currently optional)
 Route::post('/register', [AuthController::class, 'register']);
 
 /*
@@ -38,15 +36,12 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Logout the authenticated user (revoke the token)
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Endpoint to get the authenticated user's details
     Route::get('/user', function (Request $request) {
         return $request->user()->load('role');
     });
 
-    // Routes for stations (StationController will handle role-based access)
     Route::get('/stations', [StationController::class, 'index']);
     Route::get('/stations/{station}', [StationController::class, 'show']);
 
@@ -101,14 +96,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:observer')->prefix('observer')->group(function () {
         Route::get('/dashboard', [ObserverController::class, 'dashboard']);
 
-        // CRUD for observations (ObservationController will handle role-based access)
         Route::get('/observations', [ObservationController::class, 'index']);
         Route::post('/observations', [ObservationController::class, 'store']);
         Route::get('/observations/{observation}', [ObservationController::class, 'show']);
         Route::patch('/observations/{observation}', [ObservationController::class, 'update']);
         Route::delete('/observations/{observation}', [ObservationController::class, 'destroy']);
 
-        // Generation of reports (PDF, CSV, etc.)
         Route::get('/reports', [ObserverController::class, 'generateReport']);
         Route::get('/reports/history', [ObserverController::class, 'listReports']);
         Route::patch('/reports/{report}/toggle-public', [ObserverController::class, 'togglePublic']);

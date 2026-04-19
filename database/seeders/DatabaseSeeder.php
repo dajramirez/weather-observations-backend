@@ -7,7 +7,6 @@ use App\Models\Observation;
 use App\Models\Report;
 use App\Models\Station;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -22,7 +21,6 @@ class DatabaseSeeder extends Seeder
         // 1. Seed roles first
         $this->call(RoleSeeder::class);
 
-        // Define roles for reference
         $adminRole = Role::where('name', 'admin')->first();
         $observerRole = Role::where('name', 'observer')->first();
         $userRole = Role::where('name', 'user')->first();
@@ -32,21 +30,21 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@meteo.com',
             'password' => Hash::make('password'),
-            'role_id' => $adminRole->id, // Assign the 'admin' id
+            'role_id' => $adminRole->id,
         ]);
 
         $observer = User::factory()->create([
             'name' => 'Observer',
             'email' => 'observer@meteo.com',
             'password' => Hash::make('password'),
-            'role_id' => $observerRole->id, // Assign the 'observer' id
+            'role_id' => $observerRole->id,
         ]);
 
-        $regularUser = User::factory()->create([
+        $user = User::factory()->create([
             'name' => 'User',
             'email' => 'user@meteo.com',
             'password' => Hash::make('password'),
-            'role_id' => $userRole->id, // Assign the 'user' id
+            'role_id' => $userRole->id,
         ]);
 
         // 3. Create random users with random roles
@@ -75,9 +73,8 @@ class DatabaseSeeder extends Seeder
 
         // 6. Create 500 random observations
         $observations = Observation::factory(50)->create();
-        $observationsIds = $observations->pluck('id');
 
-        // 9. Generar alertas automáticamente a partir de las observaciones
+        // 7. Generar alertas automáticamente a partir de las observaciones
         foreach ($observations as $observation) {
             $alerts = [];
 
@@ -125,7 +122,7 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // 10. Create 100 random reports
+        // 8. Create 100 random reports
         Report::factory(10)->create([
             'station_id' => fn() => $stationsIds->random(),
             'user_id' => fn() => User::WhereIn('role_id', [$adminRole->id, $observerRole->id])->inRandomOrder()->value('id'),

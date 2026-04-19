@@ -31,11 +31,9 @@ class ObservationFactory extends Factory
         $observedDate = $this->faker->dateTimeBetween('-1 year', 'now', 'UTC');
 
         return [
-            // Foreign keys
             'station_id' => $stationId,
             'user_id' => $userId,
 
-            // Meteo data
             'observed_at' => $observedDate,
             'temperature' => $this->faker->randomFloat(2, -10, 40), // Between -10 and 40 °C
             'humidity' => $this->faker->randomFloat(2, 20, 100),    // Between 20% and 100%

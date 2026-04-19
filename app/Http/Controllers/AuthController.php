@@ -24,11 +24,9 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            // 'role_id' must be a valid existing role id
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        // Create the user with hashed password
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -36,7 +34,6 @@ class AuthController extends Controller
             'role_id' => $validated['role_id'],
         ]);
 
-        // Generate an access token inmediately upon registration
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

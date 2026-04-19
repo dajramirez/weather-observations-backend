@@ -9,6 +9,11 @@ use App\Models\Report;
 
 class AppUserController extends Controller
 {
+    /**
+     * List all reports.
+     * 
+     * @return JsonResponse
+     */
     public function listReports(): JsonResponse
     {
         $reports = Report::with(['station:id,name', 'user:id,name'])
@@ -19,6 +24,11 @@ class AppUserController extends Controller
         return response()->json($reports);
     }
 
+    /**
+     * List all alerts.
+     * 
+     * @return JsonResponse
+     */
     public function listAlerts(Request $request): JsonResponse
     {
         $perPage = $request->integer('per_page', 15);

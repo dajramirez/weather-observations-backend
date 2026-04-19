@@ -25,13 +25,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         // Get a random role id from the database (1, 2, or 3),
-        // or use 1 as default if the databese table is empty.
+        // or use 1 as default if the database table is empty.
         $roleId = Role::inRandomOrder()->first()->id ?? 1;
 
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            //'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role_id' => $roleId,

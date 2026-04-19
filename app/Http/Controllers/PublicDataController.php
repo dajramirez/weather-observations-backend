@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Alert;
 use App\Models\Observation;
 use App\Models\Station;
-use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

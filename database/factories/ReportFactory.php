@@ -36,7 +36,6 @@ class ReportFactory extends Factory
         $fileType = $this->faker->randomElement(['pdf', 'docx', 'xlsx']);
 
         return [
-            // Foreign keys: Ensure that the report is linked to existing station and user
             'station_id' => Station::factory(),
             'user_id' => User::factory(),
 

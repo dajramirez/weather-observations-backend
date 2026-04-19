@@ -21,7 +21,6 @@ class StationFactory extends Factory
      */
     public function definition(): array
     {
-        // Generate a unique and descriptive station name
         $name = $this->faker->city . ' ' . $this->faker->randomElement(['Norte', 'Sur', 'Este', 'Oeste', 'Central', 'Montaña']);
 
         return [

@@ -50,6 +50,12 @@ class AdminController extends Controller
     //                          REPORT MANAGEMENT
     // =========================================================================
 
+    /**
+     * Generate a report based on the provided criteria.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function generateReport(Request $request): JsonResponse
     {
         $request->validate([
@@ -86,6 +92,11 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * List all reports.
+     * 
+     * @return JsonResponse
+     */
     public function listReports(): JsonResponse
     {
         $reports = Report::with('station:id,name', 'user:id,name')
@@ -95,6 +106,12 @@ class AdminController extends Controller
         return response()->json($reports);
     }
 
+    /**
+     * Toggle the public visibility of a report.
+     * 
+     * @param Report $report
+     * @return JsonResponse
+     */
     public function togglePublic(Report $report): JsonResponse
     {
         $report->is_public = !$report->is_public;
@@ -128,7 +145,6 @@ class AdminController extends Controller
     public function updateUserRole(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([
-            // Ensure the role exists in the roles table
             'role_id' => 'required|exists:roles,id',
         ]);
 
@@ -173,7 +189,6 @@ class AdminController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Get all observers (users with role_id = 2) to facilitate assignment
         $observerRoleId = Role::where('name', 'observer')->first()->id ?? null;
         $observers = [];
         if ($observerRoleId) {
@@ -223,7 +238,6 @@ class AdminController extends Controller
     public function updateStation(Request $request, Station $station): JsonResponse
     {
         $validated = $request->validate([
-            // Name must be unique, ignoring the current station's name.
             'name' => ['required', 'string', 'max:255', Rule::unique('stations', 'name')->ignore($station->id)],
             'location' => 'required|string|max:255',
             'altitude' => 'required|integer|min:0',
@@ -348,7 +362,6 @@ class AdminController extends Controller
             'station_id' => 'required|exists:stations,id',
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            // Level validation must be one of the enum values
             'level' => ['required', 'string', Rule::in(['red', 'orange', 'yellow', 'green'])],
             'is_active' => 'boolean',
         ]);
@@ -375,7 +388,6 @@ class AdminController extends Controller
             'station_id' => 'required|exists:stations,id',
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            // Level validation must be one of the enum values
             'level' => ['required', 'string', Rule::in(['red', 'orange', 'yellow', 'green'])],
             'is_active' => 'boolean',
         ]);

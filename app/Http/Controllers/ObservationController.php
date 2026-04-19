@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 class ObservationController extends Controller
 {
     /**
-     * Display a list of the last ovservations.
+     * Display a list of the last observations.
      * 
      * @return JsonResponse
      */
@@ -21,7 +21,6 @@ class ObservationController extends Controller
 
         $query = Observation::with(['station', 'user:id,name']);
 
-        // If the user is not an admin, filter observations by user's stations
         if (!$user->hasRole('admin')) {
             $stationsIds = $user->stations->pluck('id');
             $query->whereIn('station_id', $stationsIds);
@@ -83,7 +82,7 @@ class ObservationController extends Controller
     {
         $alerts = [];
 
-        // Temperatura extrema
+        // Temperature
         if ($observation->temperature !== null) {
             if ($observation->temperature >= 42) {
                 $alerts[] = [
@@ -112,7 +111,7 @@ class ObservationController extends Controller
             }
         }
 
-        // Viento fuerte
+        // Wind speed
         if ($observation->wind_speed !== null) {
             if ($observation->wind_speed >= 90) {
                 $alerts[] = [
@@ -135,7 +134,7 @@ class ObservationController extends Controller
             }
         }
 
-        // Precipitación intensa
+        // Precipitation
         if ($observation->precipitation !== null) {
             if ($observation->precipitation >= 50) {
                 $alerts[] = [
@@ -152,7 +151,7 @@ class ObservationController extends Controller
             }
         }
 
-        // Presión atmosférica anómala
+        // Pressure
         if ($observation->pressure !== null) {
             if ($observation->pressure <= 970) {
                 $alerts[] = [
@@ -169,7 +168,7 @@ class ObservationController extends Controller
             }
         }
 
-        // Humedad extrema
+        // Humidity
         if ($observation->humidity !== null) {
             if ($observation->humidity >= 95) {
                 $alerts[] = [

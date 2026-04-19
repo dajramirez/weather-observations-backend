@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\Station;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class ObservationTest extends TestCase
@@ -27,7 +26,7 @@ class ObservationTest extends TestCase
         $observerRole = Role::create(['name' => 'observer']);
         Role::create(['name' => 'admin']);
 
-        // 2. Create a user with teh observer role.
+        // 2. Create a user with the observer role.
         $this->observer = User::factory()->create([
             'role_id' => $observerRole->id,
         ]);
@@ -92,7 +91,6 @@ class ObservationTest extends TestCase
 
         $response->assertStatus(201);
 
-        // Verify that an alert was created
         $this->assertDatabaseHas('alerts', [
             'title' => 'Calor extremo',
             'level' => 'red',

@@ -9,7 +9,7 @@ class Report extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['station_id', 'user_id', 'start_at', 'end_at', 'file_route'];
+    protected $fillable = ['station_id', 'user_id', 'start_at', 'end_at', 'file_route', 'is_public'];
 
     protected $casts = [
         'is_public' => 'boolean',

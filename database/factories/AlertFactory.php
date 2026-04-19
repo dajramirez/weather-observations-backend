@@ -25,7 +25,6 @@ class AlertFactory extends Factory
      */
     public function definition(): array
     {
-        // Define default state for Alert model
         $levels = ['red', 'orange', 'yellow', 'green'];
         $level = $this->faker->randomElement($levels);
 
@@ -40,7 +39,6 @@ class AlertFactory extends Factory
         $isActive = $this->faker->boolean(80);
 
         return [
-            // Foreign key: Ensure that the alert is linked to an existing station
             'station_id' => Station::factory(),
 
             'title' => $titles[$level] ?? 'Weather Alert',

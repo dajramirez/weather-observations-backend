@@ -48,7 +48,7 @@ class ObserverController extends Controller
     }
 
     /**
-     * Reports generation (CSV SIMULATION).
+     * Generate a report for the given station and date range
      */
 
     public function generateReport(Request $request): JsonResponse
@@ -90,6 +90,11 @@ class ObserverController extends Controller
         ]);
     }
 
+    /**
+     * List all reports.
+     * 
+     * @return JsonResponse
+     */
     public function listReports(): JsonResponse
     {
         $user = Auth::user();
@@ -105,6 +110,12 @@ class ObserverController extends Controller
         return response()->json($reports);
     }
 
+    /**
+     * Toggle the public visibility of a report.
+     * 
+     * @param Report $report
+     * @return JsonResponse
+     */
     public function togglePublic(Report $report): JsonResponse
     {
         /** @var User $user */
