@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
             );
         });
 
-        // 6. Create 500 random observations
+        // 6. Create 50 random observations
         $observations = Observation::factory(50)->create();
 
         // 7. Generar alertas automáticamente a partir de las observaciones
