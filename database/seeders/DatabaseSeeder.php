@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
 
         $stations->each(function (Station $station) use ($potentialObservers) {
             // Assign between 1 and 5 observers/admins to each station
-            $station->users()->attach(
+            $station->users()->syncWithoutDetaching(
                 $potentialObservers->random(rand(1, min(5, $potentialObservers->count())))->pluck('id')->toArray()
             );
         });
