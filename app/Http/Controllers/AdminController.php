@@ -282,27 +282,24 @@ class AdminController extends Controller
             'user_id' => [
                 'required',
                 'exists:users,id',
-                // Ensure the user is an observer
                 function ($attribute, $value, $fail) {
                     $user = User::find($value);
-                    if ($user && !$user->hasRole('observer')) {
-                        $fail('The selected user must be an observer.');
+                    if ($user && $user->hasRole('user')) {
+                        $fail('Users with role "user" cannot be assigned to stations.');
                     }
                 },
             ]
         ]);
-
-        // Avoid duplicate assignment
         if ($station->users()->where('user_id', $validated['user_id'])->exists()) {
             return response()->json([
-                'message' => 'This observer is already assigned to the station.',
+                'message' => 'This user is already assigned to the station.',
             ], 422);
         }
 
         $station->users()->attach($validated['user_id']);
 
         return response()->json([
-            'message' => "Observer assigned to station successfully.",
+            'message' => "User assigned to station successfully.",
             'station' => $station->load('users'),
         ]);
     }

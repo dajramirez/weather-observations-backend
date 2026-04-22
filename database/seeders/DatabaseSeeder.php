@@ -56,6 +56,11 @@ class DatabaseSeeder extends Seeder
         $stations = Station::factory(10)->create();
         $stationsIds = $stations->pluck('id');
 
+        // This guarantees that the observer user is assigned to at least 2 stations, so they can see some alerts.
+        $observer->stations()->attach(
+            $stations->random(min(2, $stations->count()))->pluck('id')->toArray()
+        );
+
         // 5. Assign users (admins and observers) to stations.
         // We'll make 3 predefined users and 20 random users potential admins/observers.
         $potentialObservers = User::whereIn('role_id', [$adminRole->id, $observerRole->id])
