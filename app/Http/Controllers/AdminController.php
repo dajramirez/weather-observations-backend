@@ -150,6 +150,12 @@ class AdminController extends Controller
 
         $user->update(['role_id' => $validated['role_id']]);
 
+        // If the new role is 'user', remove the user from all stations
+        $newRole = Role::find($validated['role_id']);
+        if ($newRole && $newRole->name === 'user') {
+            $user->stations()->detach();
+        }
+
         return response()->json([
             'message' => 'User role updated successfully.',
             'user' => $user->load('role'),

@@ -55,7 +55,7 @@ class ObservationController extends Controller
             $isAssigned = $user->stations()->where('stations.id', $validated['station_id'])->exists();
             if (!$isAssigned) {
                 return response()->json([
-                    'message' => 'You do not have permission to add observations for this station.',
+                    'message' => 'No tiene permiso para registrar observaciones en esta estación.',
                 ], 403);
             }
         }
@@ -66,7 +66,7 @@ class ObservationController extends Controller
         $this->checkAndCreateAlerts($observation);
 
         return response()->json([
-            'message' => 'Observation created successfully.',
+            'message' => 'Observación creada exitosamente.',
             'observation' => $observation->load('station'),
         ], 201);
     }
@@ -201,7 +201,7 @@ class ObservationController extends Controller
         // Basic access control
         if ($user->role->name !== 'admin' && !$user->stations->contains($observation->station_id)) {
             return response()->json([
-                'message' => 'You do not have permission to view this observation.',
+                'message' => 'No tiene permiso para ver esta observación.',
             ], 403);
         }
 
@@ -222,7 +222,7 @@ class ObservationController extends Controller
         // Only the author or admin can update
         if ($user->role->name !== 'admin' && $user->id !== $observation->user_id) {
             return response()->json([
-                'message' => 'You do not have permission to update observations created by other users.',
+                'message' => 'No tiene permiso para actualizar observaciones creadas por otros usuarios.',
             ], 403);
         }
 
@@ -238,7 +238,7 @@ class ObservationController extends Controller
         $observation->update($validated);
 
         return response()->json([
-            'message' => 'Observation updated successfully.',
+            'message' => 'Observación actualizada exitosamente.',
             'observation' => $observation,
         ]);
     }
@@ -255,14 +255,14 @@ class ObservationController extends Controller
 
         if ($user->role->name !== 'admin' && $user->id !== $observation->user_id) {
             return response()->json([
-                'message' => 'Forbidden.',
+                'message' => 'No tiene permiso para eliminar esta observación.',
             ], 403);
         }
 
         $observation->delete();
 
         return response()->json([
-            'message' => 'Observation deleted successfully.',
+            'message' => 'Observación eliminada exitosamente.',
         ], 200);
     }
 }
