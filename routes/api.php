@@ -83,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/alerts', [AdminController::class, 'createAlert']);
         Route::patch('/alerts/{alert}', [AdminController::class, 'updateAlert']);
         Route::delete('/alerts/{alert}', [AdminController::class, 'deleteAlert']);
-        Route::patch('/alerts/{alert}/toggle-active', [AlertController::class, 'togleActive']);
+        Route::patch('/alerts/{alert}/toggle-active', [AlertController::class, 'toggleActive']);
     });
 
     /*
